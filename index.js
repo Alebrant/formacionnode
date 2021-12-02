@@ -4,6 +4,7 @@ const express = require('express')
 const path = require('path')
 const { MongoClient, ObjectId } = require('mongodb')
 const { response } = require('express')
+const cors = require('cors')
 
 
 // BLOQUE VARIABLES
@@ -14,10 +15,15 @@ const port = process.env.PORT || 8000
 const clienteDB = new MongoClient("mongodb://localhost:27017/formacion")
 let db = null;
 let colecciones = {};
+const origenesPermitidos = process.env.CORS_ORIGENES_PERMITIDOS.split(";");
 
 
 // BLOQUE CONFIGURACION
 app.use(express.json())
+app.use(cors({
+    origen: origenesPermitidos
+}))
+
 clienteDB.connect((err) => {
     if (err) {
         console.log(`Error al conectar: $(err)`);
@@ -26,7 +32,7 @@ clienteDB.connect((err) => {
     console.log("conectado");
     db = clienteDB.db("formacion");
     colecciones.personas = db.collection("personas");
-    colecciones.horas = db.collection("horas");
+    // colecciones.horas = db.collection("horas");
 
     // CRUD
     app.get('/empleados/', (request, response) => {
@@ -36,10 +42,6 @@ clienteDB.connect((err) => {
             }
             response.send(items);
         })
-        /*const empleados = res.send([
-            { id: 1, nombre: 'Pepe' },
-            { id: 2, nombre: 'Luis' }
-        ])*/
     })
 
     app.get('/empleados/:id', (request, response) => {
